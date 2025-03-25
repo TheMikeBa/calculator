@@ -3,32 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>CALCULATOR</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <div class="display"></div>
+      <div class="display">0</div>
       <div class="keypad">
-        <button class="function">CLR</button>
-        <button class="function">+/-</button>
-        <button class="function">DEL</button>
-        <button class="function">EXP</button>
-        <button class="key">7</button>
-        <button class="key">8</button>
-        <button class="key">9</button>
-        <button class="operator">×</button>
-        <button class="key">4</button>
-        <button class="key">5</button>
-        <button class="key">6</button>
-        <button class="operator">÷</button>
-        <button class="key">1</button>
-        <button class="key">2</button>
-        <button class="key">3</button>
-        <button class="operator">-</button>
-        <button class="key zero">0</button>
-        <button class="key">.</button>
-        <button class="operator">+</button>
+        <button class="btn function" data-action="clear">CLR</button>
+        <button class="btn function" data-action="sign">+/-</button>
+        <button class="btn function" data-action="delete">DEL</button>
+        <button class="btn function" data-action="exponent" data-value="**">
+          EXP
+        </button>
+        <button class="btn key" data-action="number" data-value="7">7</button>
+        <button class="btn key" data-action="number" data-value="8">8</button>
+        <button class="btn key" data-action="number" data-value="9">9</button>
+        <button class="btn operator" data-action="operator" data-value="*">
+          ×
+        </button>
+        <button class="btn key" data-action="number" data-value="4">4</button>
+        <button class="btn key" data-action="number" data-value="5">5</button>
+        <button class="btn key" data-action="number" data-value="6">6</button>
+        <button class="btn operator" data-action="operator" data-value="/">
+          ÷
+        </button>
+        <button class="btn key" data-action="number" data-value="1">1</button>
+        <button class="btn key" data-action="number" data-value="2">2</button>
+        <button class="btn key" data-action="number" data-value="3">3</button>
+        <button class="btn operator" data-action="operator" data-value="-">
+          -
+        </button>
+        <button
+          class="btn key"
+          data-action="number"
+          data-value="0"
+          data-width="double"
+        >
+          0
+        </button>
+        <button class="btn key" data-action="decimal" data-value=".">.</button>
+        <button class="btn operator" data-action="operator" data-value="+">
+          +
+        </button>
       </div>
     </div>
     <script src="script.js"></script>

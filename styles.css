@@ -1,60 +1,111 @@
 :root {
-  --button-radius: 2px;
+  --button-radius: 0.125rem; /* 2px */
+  --font-size-large: 2.25rem; /* 36px */
+  --font-size-medium: 1.75rem; /* 28px */
+  --font-size-normal: 1.5rem; /* 24px */
+  --font-size-small: 1.25rem; /* 20px */
+  --font-size-error: 1rem; /* 16px */
+}
+
+/* Add at the top of the file */
+body {
+  background-color: #1a1a1a; /* Slightly darker than calculator */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
 }
 
 .container {
-  background-color: #1c1c1c; /* Dark gray background */
-  width: 350px;
-  height: 500px;
-  padding: 20px;
-  margin: auto;
+  background-color: #363636;  /* Lighter than #2d2d2d */
+  width: 21.875rem; /* 350px */
+  height: 31.25rem; /* 500px */
+  padding: 1.25rem; /* 20px */
+  margin: 2rem auto; /* Changed from just auto */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .display {
-  background-color: #1c1c1c;
+  background-color: #363636;  /* Match container */
   color: white;
-  height: 40px;
-  padding: 10px;
-  font-size: 36px; /* Large size for better readability */
-  text-align: right; /* Numbers typically align right in calculators */
+  height: 2.5rem; /* 40px */
+  padding: 0.625rem; /* 10px */
+  font-size: var(--font-size-large);
+  text-align: right;
+  transition: all 0.2s ease-in-out;
+  border-bottom: 1px solid #404040;
+  margin-bottom: 1rem;
+  min-height: 2.5rem;  /* Change from fixed height */
+  overflow: hidden;  /* Prevent content overflow */
+  position: relative;  /* For potential overflow handling */
 }
 
 .keypad {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  gap: 10px;
-  padding-top: 10px;
-  height: 400px;
+  gap: 0.625rem; /* 10px */
+  padding-top: 0.625rem;
+  height: 25rem; /* 400px */
+}
+
+.btn {
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 6px;  /* Slightly more rounded buttons */
+  user-select: none;  /* Prevent text selection on button press */
+}
+
+.btn:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+  opacity: 0.6;
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.operator:hover {
+  opacity: 0.85;
+  background-color: #ffb52e;
+  transform: translateY(-1px);
+  font-weight: 500;  /* Make operators slightly bolder */
+}
+
+.function:hover {
+  opacity: 0.75;
+  background-color: #e8e8e6;
+  transform: translateY(-1px);
+  text-transform: uppercase;  /* Make function text more distinct */
+  letter-spacing: 0.5px;  /* Space out the text slightly */
 }
 
 .key {
   background-color: #505050;
   color: white;
-  font-size: 24px;
-  border-radius: var(--button-radius);
+  font-size: var(--font-size-normal);
 }
 
 .operator {
   background-color: #ff9f0a;
   color: white;
-  font-size: 28px;
-  border-radius: var(--button-radius);
+  font-size: var(--font-size-medium);
 }
 
 .function {
   background-color: #d4d4d2;
   color: black;
-  font-size: 20px;
-  border-radius: var(--button-radius);
+  font-size: var(--font-size-small);
 }
 
-.equals {
-  font-size: 32px;
-  border-radius: var(--button-radius);
-}
-
-.zero {
+.btn[data-width="double"] {
   grid-column: span 2;
 }
