@@ -139,6 +139,14 @@ function handleDelete() {
 function clearCurrentInput() {
   currentInput = [];
 }
+
+function clear() {
+  display.innerText = "0";
+  currentInput = [];
+  expression = [];
+  signChange = false;
+}
+
 function invalid(message = "Invalid Operation") {
   display.innerText = message;
 }
