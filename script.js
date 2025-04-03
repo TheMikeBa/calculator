@@ -1,26 +1,62 @@
 const display = document.querySelector(".display");
+const expressionDisplay = document.querySelector(".expression-display");
 const operators = ["+", "-", "*", "/", "="];
 
+// Calculator configuration
+const DECIMAL_PLACES = 10;
+const SCIENTIFIC_NOTATION_THRESHOLD = 1e9;
+const SCIENTIFIC_NOTATION_PRECISION = 5;
+
+// Display helper functions
+const getDisplayText = () => display.innerText;
+const setDisplayText = (text) => (display.innerText = text);
+const getDisplayHTML = () => display.innerHTML;
+const setDisplayHTML = (html) => (display.innerHTML = html);
+const appendDisplayText = (text) => setDisplayText(getDisplayText() + text);
+const handleExponentDisplay = (value) => {
+  const parts = getDisplayHTML().split("<sup>");
+  const baseNumber = parts[0];
+  const exponent = parts.length > 1 ? parts[1].replace("</sup>", "") : "";
+  setDisplayHTML(baseNumber + "<sup>" + exponent + value + "</sup>");
+};
+
+// Expression display helper function
+const updateExpressionDisplay = () => {
+  expressionDisplay.innerText =
+    expression.length > 0 ? expression.join(" ") : "–";
+};
+
+// Number conversion helper function
+const convertToNumber = (value) => {
+  if (typeof value === "number") {
+    value = value.toString();
+  }
+
+  if (value.includes("**")) {
+    const [base, exponent] = value.split("**");
+    return Math.pow(parseFloat(base), parseFloat(exponent));
+  }
+  return parseFloat(value);
+};
+
+// Calculator State
 let currentInput = [];
 let expression = [];
 let signChange = false;
 
+// Input Handlers
 function handleNumber(button) {
   const value = button.dataset.value;
 
   // Clear display only when starting a new number
   if (currentInput.length === 0) {
-    display.innerText = "";
+    setDisplayText("");
   }
 
-  // Consider extracting exponent display logic to a separate function
   if (currentInput.includes("**")) {
-    const parts = display.innerHTML.split("<sup>");
-    const baseNumber = parts[0];
-    const exponent = parts.length > 1 ? parts[1].replace("</sup>", "") : "";
-    display.innerHTML = baseNumber + "<sup>" + exponent + value + "</sup>";
+    handleExponentDisplay(value);
   } else {
-    display.innerText += value;
+    appendDisplayText(value);
   }
 
   currentInput.push(value);
@@ -33,20 +69,18 @@ function handleNumber(button) {
 }
 
 function handleDecimal(button) {
-  // Consider checking if we're in exponent mode
   if (currentInput.includes("**")) {
-    showError("Cannot add decimal to exponent");
+    showError("Please complete the exponent first");
     return;
   }
 
   if (currentInput.includes(".")) {
-    showError("You can only have one decimal point in a number");
+    showError("Please start a new number");
     return;
   }
 
   currentInput.push(".");
-  display.innerText =
-    currentInput.length === 1 ? "0." : display.innerText + ".";
+  setDisplayText(currentInput.length === 1 ? "0." : getDisplayText() + ".");
 }
 
 function handleFunction(button) {
@@ -68,78 +102,60 @@ function handleFunction(button) {
 }
 
 function handleOperator(button) {
-  // Validate input; ensure there's a number before an operator and not two operators in a row
   if (
     (currentInput.length === 0 && expression.length === 0) ||
     operators.includes(currentInput[currentInput.length - 1])
   ) {
-    showError();
+    showError("Please input a value");
     return;
   }
 
   const value = button.dataset.value;
 
-  // Add current number to expression if exists
   if (currentInput.length > 0) {
     expression.push(currentInput.join(""));
     currentInput = [];
   }
 
-  // Handle equals sign separately
   if (value === "=") {
     if (expression.length === 3) {
-      calculate();
+      const result = calculate();
+      if (result === undefined) return; // Invalid calculation
+      expressionDisplay.innerText = `${expression.join(" ")} =`;
+      reset(false);
     } else {
-      showError();
+      showError("Please complete the expression");
     }
-    // TESTING
-    console.log("handleOperator/equals");
-    console.log("value", value);
-    console.log("currentInput", currentInput);
-    console.log("expression", expression);
     return;
   }
 
-  // Handle regular operators
   if (expression.length === 3) {
     const result = calculate();
+    if (result === undefined) return; // Invalid calculation
     expression = [result, value];
   } else {
     expression.push(value);
   }
-  // TESTING
-  console.log("handleOperator/operator");
-  console.log("value", value);
-  console.log("currentInput", currentInput);
-  console.log("expression", expression);
+  updateExpressionDisplay();
 }
 
+// Core utility functions
 function calculate() {
   if (expression.length < 3) {
     showError();
     return;
   }
 
-  // Handle exponents in both numbers
-  let num1 = expression[0];
-  let num2 = expression[2];
-
-  if (num1.includes('**')) {
-    const [base, exponent] = num1.split('**');
-    num1 = Math.pow(parseFloat(base), parseFloat(exponent));
-  } else {
-    num1 = parseFloat(num1);
-  }
-
-  if (num2.includes('**')) {
-    const [base, exponent] = num2.split('**');
-    num2 = Math.pow(parseFloat(base), parseFloat(exponent));
-  } else {
-    num2 = parseFloat(num2);
-  }
-
+  const num1 = convertToNumber(expression[0]);
+  const num2 = convertToNumber(expression[2]);
   const operator = expression[1];
   let result = 0;
+
+  // TESTING
+  console.log("calculate");
+  console.log("num1", num1);
+  console.log("num2", num2);
+  console.log("operator", operator);
 
   switch (operator) {
     case "+":
@@ -153,42 +169,47 @@ function calculate() {
       break;
     case "/":
       if (num2 === 0) {
-        showError("Cannot divide by zero");
-        return;
+        showError("Please use a non-zero divisor");
+        return undefined;
       }
       result = num1 / num2;
       break;
   }
-  display.innerText = result;
-  // TESTING
-  console.log("calculate");
-  console.log("currentInput", currentInput);
-  console.log("expression", expression);
+
+  // Handle large numbers and rounding with configuration constants
+  result = Number(result.toFixed(DECIMAL_PLACES));
+  if (Math.abs(result) > SCIENTIFIC_NOTATION_THRESHOLD) {
+    result = result.toExponential(SCIENTIFIC_NOTATION_PRECISION);
+  }
+
+  setDisplayText(result);
   return result;
 }
 
-function reset() {
+function reset(resetDisplay = true) {
   currentInput = [];
   expression = [];
-  display.innerText = "0";
+  if (resetDisplay) {
+    setDisplayText("0");
+    expressionDisplay.innerText = "–"; // Match the initial state
+  }
   signChange = false;
 }
 
 function toggleSign() {
-  // Consider handling when there's no input
   if (currentInput.length === 0) {
-    showError("No number to change sign");
+    showError("Please input a value");
     return;
   }
 
   if (signChange) {
-    currentInput.shift(); // Just remove the first element (the minus sign)
-    display.innerText = display.innerText.slice(1);
+    currentInput.shift();
+    setDisplayText(getDisplayText().slice(1));
     signChange = false;
     return;
   }
   currentInput.unshift("-");
-  display.innerText = "-" + display.innerText;
+  setDisplayText("-" + getDisplayText());
   signChange = true;
   // TESTING
   console.log("toggleSign");
@@ -199,41 +220,44 @@ function toggleSign() {
 
 function deleteLastDigit() {
   if (currentInput.length === 0) {
-    showError("There is nothing to delete");
+    showError("Nothing to delete");
     return;
   }
   currentInput.pop();
-  display.innerText = currentInput.join("");
+  setDisplayText(currentInput.join(""));
 }
 
 function addExponent() {
-  // Check for empty input first
   if (currentInput.length === 0) {
-    showError("There is nothing to exponentiate");
+    showError("Please input a value");
     return;
   }
 
-  // Toggle exponent if it's the last character
   const lastChar = currentInput[currentInput.length - 1];
   if (lastChar === "**") {
     currentInput.pop();
+    setDisplayText(currentInput.join(""));
     return;
   }
 
-  // Prevent multiple exponents
   if (currentInput.includes("**")) {
-    showError("You can only have one exponent in a number");
+    showError("Please complete current exponent");
     return;
   }
 
-  // Add exponent operator
   currentInput.push("**");
+  setDisplayHTML(getDisplayText() + "<sup>");
 }
 
 function showError(message = "Invalid Operation") {
-  display.innerText = message;
+  expressionDisplay.innerText = message;
+  setDisplayText("0");
+  setTimeout(() => {
+    expressionDisplay.innerText = "–";
+  }, 2000);
 }
 
+// Event Listeners
 document.querySelectorAll('[data-action="number"]').forEach((button) => {
   button.addEventListener("click", () => {
     handleNumber(button);
@@ -252,7 +276,7 @@ document.querySelectorAll(".function").forEach((button) => {
   button.addEventListener("click", () => handleFunction(button));
 });
 
-// Modify the bottom export section
+// Testing exports
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     handleNumber,
@@ -266,8 +290,14 @@ if (typeof module !== "undefined" && module.exports) {
     addExponent,
     showError,
     // Add these state variables
-    get currentInput() { return currentInput; },
-    get expression() { return expression; },
-    get signChange() { return signChange; }
+    get currentInput() {
+      return currentInput;
+    },
+    get expression() {
+      return expression;
+    },
+    get signChange() {
+      return signChange;
+    },
   };
 }

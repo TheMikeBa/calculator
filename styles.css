@@ -7,7 +7,6 @@
   --font-size-error: 1rem; /* 16px */
 }
 
-/* Add at the top of the file */
 body {
   background-color: #1a1a1a; /* Slightly darker than calculator */
   min-height: 100vh;
@@ -18,29 +17,56 @@ body {
 }
 
 .container {
-  background-color: #363636; /* Lighter than #2d2d2d */
-  width: 21.875rem; /* 350px */
-  height: 31.25rem; /* 500px */
-  padding: 1.25rem; /* 20px */
-  margin: 2rem auto; /* Changed from just auto */
+  background-color: #363636;
+  width: 21.875rem;
+  height: 33.75rem; /* Increased from 31.25rem to accommodate expression display */
+  padding: 1.25rem;
+  margin: 2rem auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
+.expression-display {
+  min-height: 1.5rem;
+  height: 1.5rem;
+  font-size: var(--font-size-small);
+  color: #666;
+  text-align: right;
+  padding: 0.3125rem;
+  margin-bottom: 0.3125rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* Remove flex display as it can interfere with text overflow */
+}
+
 .display {
-  background-color: #363636; /* Match container */
+  background-color: #363636;
   color: white;
-  height: 2.5rem; /* 40px */
-  padding: 0.625rem; /* 10px */
+  height: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.625rem;
   font-size: var(--font-size-large);
   text-align: right;
   transition: all 0.2s ease-in-out;
   border-bottom: 1px solid #404040;
   margin-bottom: 1rem;
-  min-height: 2.5rem; /* Change from fixed height */
-  overflow: hidden; /* Prevent content overflow */
-  position: relative; /* For potential overflow handling */
+  overflow: hidden;
+  position: relative;
+  line-height: 2.5rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex; /* Add flex display */
+  align-items: center; /* Center items vertically */
+  justify-content: flex-end; /* Right align content */
+}
+
+.display sup {
+  font-size: 0.5em; /* Make superscript smaller */
+  line-height: 1; /* Reset line height for sup */
+  position: relative;
+  top: -0.5em; /* Fine-tune vertical position */
 }
 
 .keypad {
@@ -49,7 +75,7 @@ body {
   grid-template-rows: repeat(5, 1fr);
   gap: 0.625rem; /* 10px */
   padding-top: 0.625rem;
-  height: 25rem; /* 400px */
+  height: 23.75rem; /* Adjusted from 25rem to fit in container */
 }
 
 .btn {
@@ -73,21 +99,6 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.operator:hover {
-  opacity: 0.85;
-  background-color: #ffb52e;
-  transform: translateY(-1px);
-  font-weight: 500; /* Make operators slightly bolder */
-}
-
-.function:hover {
-  opacity: 0.75;
-  background-color: #e8e8e6;
-  transform: translateY(-1px);
-  text-transform: uppercase; /* Make function text more distinct */
-  letter-spacing: 0.5px; /* Space out the text slightly */
-}
-
 .key {
   background-color: #505050;
   color: white;
@@ -100,19 +111,34 @@ body {
   font-size: var(--font-size-medium);
 }
 
+.operator:hover {
+  opacity: 0.85;
+  background-color: #ffb52e;
+  transform: translateY(-1px);
+  font-weight: 500; /* Make operators slightly bolder */
+}
+
 .function {
   background-color: #d4d4d2;
   color: black;
   font-size: var(--font-size-small);
 }
 
+.function:hover {
+  opacity: 0.75;
+  background-color: #e8e8e6;
+  transform: translateY(-1px);
+  text-transform: uppercase; /* Make function text more distinct */
+  letter-spacing: 0.5px; /* Space out the text slightly */
+}
+
 .operator[data-value="="] {
-  background-color: #147efb;  /* Apple's blue, more consistent with the theme */
+  background-color: #147efb; /* Apple's blue, more consistent with the theme */
   color: white;
   font-size: var(--font-size-large);
 }
 
 .operator[data-value="="]:hover {
-  background-color: #0056d6;  /* Darker shade of the blue */
+  background-color: #0056d6; /* Darker shade of the blue */
   opacity: 0.9;
 }
