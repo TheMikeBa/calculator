@@ -57,16 +57,26 @@ body {
   line-height: 2.5rem;
   white-space: nowrap;
   text-overflow: ellipsis;
-  display: flex; /* Add flex display */
-  align-items: center; /* Center items vertically */
-  justify-content: flex-end; /* Right align content */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.cursor {
+  animation: blink 1s infinite;
+  font-weight: bold;
+  color: #ffb52e;
+  font-size: 1em;
+  position: relative;
+  top: -0.125em;  /* Added to lift cursor position */
+  line-height: 1;  /* Added to ensure consistent height */
 }
 
 .display sup {
-  font-size: 0.5em; /* Make superscript smaller */
-  line-height: 1; /* Reset line height for sup */
+  font-size: 0.5em;
+  line-height: 1;
   position: relative;
-  top: -0.5em; /* Fine-tune vertical position */
+  top: -0.5em;
 }
 
 .keypad {
@@ -141,4 +151,14 @@ body {
 .operator[data-value="="]:hover {
   background-color: #0056d6; /* Darker shade of the blue */
   opacity: 0.9;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
