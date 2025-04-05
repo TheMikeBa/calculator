@@ -169,6 +169,12 @@ function handleOperator(button) {
     return;
   }
 
+  // Prevent operators during exponent input
+  if (currentInput.includes("**")) {
+    showError("Please complete the exponent first");
+    return;
+  }
+
   const value = button.dataset.value;
 
   if (currentInput.length > 0) {
@@ -255,8 +261,8 @@ function reset(resetDisplay = true) {
   currentInput = [];
   expression = [];
   if (resetDisplay) {
-    setDisplayText("0");
-    expressionDisplay.innerText = "–"; // Match the initial state
+    setDisplayHTML("", false); // Changed from setDisplayText("0")
+    expressionDisplay.innerText = "–";
   }
   signChange = false;
 }
