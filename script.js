@@ -1,6 +1,5 @@
 const display = document.querySelector(".display");
 const expressionDisplay = document.querySelector(".expression-display");
-const operators = ["+", "-", "*", "/", "="];
 
 // Calculator configuration
 const DECIMAL_PLACES = 10;
@@ -21,6 +20,14 @@ const setDisplayHTML = (html, append = true) => {
       currentContent + cleanContent + '<span class="cursor">|</span>';
   }
 };
+
+// Expression display helper functions
+const getExpressionText = () => expressionDisplay.innerText;
+const setExpressionText = (text) => (expressionDisplay.innerText = text);
+const updateExpressionDisplay = () => {
+  setExpressionText(expression.length > 0 ? expression.join(" ") : "–"); // Changed
+};
+
 
 const exponentDisplay = (value) => {
   const parts = getDisplayHTML().split("<sup>");
@@ -72,12 +79,6 @@ function addExponent() {
     cleanDisplay + "<sup>" + '<span class="cursor">|</span></sup>';
 }
 
-// Expression display helper function
-const updateExpressionDisplay = () => {
-  expressionDisplay.innerText =
-    expression.length > 0 ? expression.join(" ") : "–";
-};
-
 // Number conversion helper function
 const convertToNumber = (value) => {
   if (typeof value === "number") {
@@ -105,12 +106,11 @@ function handleNumber(button) {
   } else if (currentInput.includes("**")) {
     exponentDisplay(value);
   } else {
-    // Change this line to use currentInput array
     setDisplayHTML(currentInput.join("") + value, false);
   }
 
   // Clear expression if starting new number after completed calculation
-  if (expressionDisplay.innerText.includes("=")) {
+  if (getExpressionText().includes("=")) { // Changed from expressionDisplay.innerText
     expression = [];
     updateExpressionDisplay();
   }
@@ -169,10 +169,20 @@ function handleOperator(button) {
     return;
   }
 
-  // Prevent operators during exponent input
+  // Handle operators during exponent input
   if (currentInput.includes("**")) {
-    showError("Please complete the exponent first");
-    return;
+    // If we have a complete exponent (base**exp), evaluate it first
+    if (currentInput.length > 1 && currentInput[currentInput.length - 1] !== "**") {
+      const exponentValue = currentInput.join("");
+      const result = convertToNumber(exponentValue);
+      expression.push(result.toString()); // Keep as string for consistency
+      currentInput = [];
+    } 
+    // If exponent was just started (last char is "**"), remove it
+    else if (currentInput[currentInput.length - 1] === "**") {
+      currentInput.pop();
+      setDisplayHTML(currentInput.join(""), false);
+    }
   }
 
   const value = button.dataset.value;
@@ -186,9 +196,9 @@ function handleOperator(button) {
     // Handle direct exponentiation
     if (expression.length === 1 && expression[0].includes("**")) {
       const result = convertToNumber(expression[0]);
-      expressionDisplay.innerText = `${expression.join(" ")} =`;
-      setDisplayText(result);
-      expression = [result]; // Keep result in expression
+      setExpressionText(`${expression.join(" ")} =`);
+      setDisplayText(result.toString()); // Convert to string
+      expression = [result.toString()]; // Store as string
       return;
     }
 
@@ -196,9 +206,9 @@ function handleOperator(button) {
     if (expression.length === 3) {
       const result = calculate();
       if (result === undefined) return;
-      expressionDisplay.innerText = `${expression.join(" ")} =`;
-      setDisplayText(result);
-      expression = [result]; // Keep result in expression
+      setExpressionText(`${expression.join(" ")} =`);
+      setDisplayText(result.toString()); // Convert to string
+      expression = [result.toString()]; // Store as string
     }
     return;
   }
@@ -257,14 +267,12 @@ function calculate() {
   return result;
 }
 
-function reset(resetDisplay = true) {
+function reset() {
   currentInput = [];
   expression = [];
-  if (resetDisplay) {
-    setDisplayHTML("", false); // Changed from setDisplayText("0")
-    expressionDisplay.innerText = "–";
-  }
   signChange = false;
+  setDisplayHTML("", false); // Reset display to just cursor
+  setExpressionText("–"); // Changed from expressionDisplay.innerText = "–"
 }
 
 function toggleSign() {
@@ -299,7 +307,7 @@ function deleteLastDigit() {
 }
 
 function showError(message = "Invalid Operation", preserveState = true) {
-  expressionDisplay.innerText = message;
+  setExpressionText(message); // Changed from expressionDisplay.innerText = message
 
   if (!preserveState) {
     currentInput = [];
