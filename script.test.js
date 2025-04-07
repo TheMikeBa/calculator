@@ -339,9 +339,151 @@ describe("Edge Cases", () => {
       calculator.showError = originalShowError;
       jest.useRealTimers();
     });
-  test("large numbers", () => {});
-  test("negative numbers in operations", () => {});
-  test("multiple zeros at start", () => {});
+  test("large numbers", () => {
+      // Enter a large number
+      const largeNumber = "9999999999";
+      for (let digit of largeNumber) {
+        const button = document.createElement("button");
+        button.dataset.value = digit;
+        button.dataset.action = "number";
+        calculator.handleNumber(button);
+      }
+  
+      checkDisplays(largeNumber, "–");
+      checkState(largeNumber.split(""), [], false);
+  
+      // Test calculation with large numbers
+      const operatorButton = document.createElement("button");
+      operatorButton.dataset.value = "*";
+      operatorButton.dataset.action = "operator";
+      calculator.handleOperator(operatorButton);
+  
+      const secondNumber = "2";
+      const secondButton = document.createElement("button");
+      secondButton.dataset.value = secondNumber;
+      secondButton.dataset.action = "number";
+      calculator.handleNumber(secondButton);
+  
+      const equalsButton = document.createElement("button");
+      equalsButton.dataset.value = "=";
+      equalsButton.dataset.action = "operator";
+      calculator.handleOperator(equalsButton);
+  
+      // Instead of using regex to check for scientific notation
+      const result = displayText();
+      
+      // Check if the result contains 'e+' which indicates scientific notation
+      expect(result.includes('e+')).toBe(true);
+      
+      // Verify the actual numeric value matches the expected calculation
+      const numericResult = Number(result);
+      const expectedResult = Number(largeNumber) * Number(secondNumber);
+      expect(numericResult).toBe(expectedResult);
+      
+      expect(expressionText()).toBe(`${largeNumber} * ${secondNumber} =`);
+    });  
+  test("negative numbers in operations", () => {
+    // Test negative number in operation
+    const buttons = [
+      { value: "5", action: "number" },
+      { value: "-", action: "operator" },
+      { action: "sign" }, // Make the next number negative
+      { value: "3", action: "number" },
+      { value: "=", action: "operator" }
+    ];
+  
+    buttons.forEach((btn) => {
+      const button = document.createElement("button");
+      if (btn.value) button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      else if (btn.action === "operator") calculator.handleOperator(button);
+      else if (btn.action === "sign") calculator.handleFunction(button);
+    });
+  
+    checkDisplays("8", "5 - -3 ="); // 5 - (-3) = 8
+    checkState([], [8], false);
+  
+  // Test calculation with negative first number
+  calculator.reset();
+  
+  const firstNumButton = document.createElement("button");
+  firstNumButton.dataset.value = "7";
+  firstNumButton.dataset.action = "number";
+  calculator.handleNumber(firstNumButton);
+  
+  const signButton = document.createElement("button");
+  signButton.dataset.action = "sign";
+  calculator.handleFunction(signButton);
+  
+  const opButton = document.createElement("button");
+  opButton.dataset.value = "+";
+  opButton.dataset.action = "operator";
+  calculator.handleOperator(opButton);
+  
+  const secondNumButton = document.createElement("button");
+  secondNumButton.dataset.value = "4";
+  secondNumButton.dataset.action = "number";
+  calculator.handleNumber(secondNumButton);
+  
+  const eqButton = document.createElement("button");
+  eqButton.dataset.value = "=";
+  eqButton.dataset.action = "operator";
+  calculator.handleOperator(eqButton);
+  
+  checkDisplays("-3", "-7 + 4 ="); // -7 + 4 = -3
+  checkState([], [-3], false);
+  });
+  test("multiple zeros at start", () => {
+      // Test entering multiple zeros at start
+      const buttons = [
+        { value: "0", action: "number" },
+        { value: "0", action: "number" },
+        { value: "0", action: "number" }
+      ];
+  
+      buttons.forEach((btn) => {
+        const button = document.createElement("button");
+        button.dataset.value = btn.value;
+        button.dataset.action = btn.action;
+        calculator.handleNumber(button);
+      });
+  
+      // Should display just a single zero
+      checkDisplays("0", "–");
+      checkState(["0"], [], false);
+  
+      // Now add a non-zero digit
+      const nonZeroButton = document.createElement("button");
+      nonZeroButton.dataset.value = "5";
+      nonZeroButton.dataset.action = "number";
+      calculator.handleNumber(nonZeroButton);
+  
+      // Should now show "5" (replacing the zero)
+      checkDisplays("5", "–");
+      checkState(["5"], [], false);
+  
+      // Test with decimal point
+      calculator.reset();
+      const zeroDecimalButtons = [
+        { value: "0", action: "number" },
+        { value: "0", action: "number" },
+        { value: ".", action: "decimal" },
+        { value: "3", action: "number" }
+      ];
+  
+      zeroDecimalButtons.forEach((btn) => {
+        const button = document.createElement("button");
+        button.dataset.value = btn.value;
+        button.dataset.action = btn.action;
+        if (btn.action === "number") calculator.handleNumber(button);
+        if (btn.action === "decimal") calculator.handleDecimal(button);
+      });
+  
+      // Should display "0.3" (keeping the leading zero for decimal)
+      checkDisplays("0.3", "–");
+      checkState(["0", ".", "3"], [], false);
+    });
 });
 
 describe("Error Cases", () => {

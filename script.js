@@ -5,6 +5,7 @@ const expressionDisplay = document.querySelector(".expression-display");
 const DECIMAL_PLACES = 10;
 const SCIENTIFIC_NOTATION_THRESHOLD = 1e9;
 const SCIENTIFIC_NOTATION_PRECISION = 5;
+const OPERATORS = ["+", "-", "*", "/"];
 
 // Display helper functions
 const getDisplayText = () => display.innerText;
@@ -27,7 +28,6 @@ const setExpressionText = (text) => (expressionDisplay.innerText = text);
 const updateExpressionDisplay = () => {
   setExpressionText(expression.length > 0 ? expression.join(" ") : "–"); // Changed
 };
-
 
 const exponentDisplay = (value) => {
   const parts = getDisplayHTML().split("<sup>");
@@ -101,6 +101,20 @@ let signChange = false;
 function handleNumber(button) {
   const value = button.dataset.value;
 
+  // Handle leading zeros
+  if (value === "0" && currentInput.length === 1 && currentInput[0] === "0") {
+    // If we already have a single zero, don't add more zeros
+    return;
+  }
+  
+  // Replace a single leading zero with the new digit (unless it's a decimal number)
+  if (value !== "0" && currentInput.length === 1 && currentInput[0] === "0" && !currentInput.includes(".")) {
+    currentInput = [];
+    setDisplayHTML(value, false);
+    currentInput.push(value);
+    return;
+  }
+
   if (currentInput.length === 0) {
     setDisplayHTML(value, false);
   } else if (currentInput.includes("**")) {
@@ -110,7 +124,7 @@ function handleNumber(button) {
   }
 
   // Clear expression if starting new number after completed calculation
-  if (getExpressionText().includes("=")) { // Changed from expressionDisplay.innerText
+  if (getExpressionText().includes("=")) {
     expression = [];
     updateExpressionDisplay();
   }
@@ -142,7 +156,13 @@ function handleDecimal(button) {
   if (isInExponent) {
     exponentDisplay("."); // changed from handleExponentDisplay
   } else {
-    setDisplayText(currentInput.length === 1 ? "0." : getDisplayText() + ".");
+    // Replace this line:
+    // setDisplayText(currentInput.length === 1 ? "0." : getDisplayText() + ".");
+    // With this:
+    setDisplayHTML(
+      currentInput.length === 1 ? "0." : currentInput.join(""),
+      false
+    );
   }
 }
 
@@ -172,12 +192,15 @@ function handleOperator(button) {
   // Handle operators during exponent input
   if (currentInput.includes("**")) {
     // If we have a complete exponent (base**exp), evaluate it first
-    if (currentInput.length > 1 && currentInput[currentInput.length - 1] !== "**") {
+    if (
+      currentInput.length > 1 &&
+      currentInput[currentInput.length - 1] !== "**"
+    ) {
       const exponentValue = currentInput.join("");
       const result = convertToNumber(exponentValue);
       expression.push(result.toString()); // Keep as string for consistency
       currentInput = [];
-    } 
+    }
     // If exponent was just started (last char is "**"), remove it
     else if (currentInput[currentInput.length - 1] === "**") {
       currentInput.pop();
@@ -190,6 +213,7 @@ function handleOperator(button) {
   if (currentInput.length > 0) {
     expression.push(currentInput.join(""));
     currentInput = [];
+    signChange = false; // Reset signChange when adding to expression
   }
 
   if (value === "=") {
@@ -213,13 +237,25 @@ function handleOperator(button) {
     return;
   }
 
-  // Calculate and keep result if we have a complete expression
-  if (expression.length === 3) {
-    const result = calculate();
-    if (result === undefined) return;
-    expression = [result, value];
+  // Check if the last item in expression is an operator
+  // If so, replace it with the new operator
+  if (
+    expression.length > 0 &&
+    OPERATORS.includes(expression[expression.length - 1])
+  ) {
+    expression[expression.length - 1] = value;
   } else {
-    expression.push(value);
+    // Calculate and keep result if we have a complete expression
+    if (expression.length === 3) {
+      const result = calculate();
+      if (result === undefined) return;
+      expression = [result, value];
+      
+      // Clear the display when chaining calculations
+      setDisplayHTML("", false);
+    } else {
+      expression.push(value);
+    }
   }
   updateExpressionDisplay();
 }
@@ -276,20 +312,33 @@ function reset() {
 }
 
 function toggleSign() {
+  // If no input yet, add a negative sign to start with
   if (currentInput.length === 0) {
-    showError("Please input a value");
+    // Check if we're in the middle of a calculation
+    if (expression.length >= 2 && OPERATORS.includes(expression[expression.length - 1])) {
+      // We're toggling the sign for the second number in a calculation
+      currentInput.push("-");
+      setDisplayHTML("-", false);
+      signChange = true;
+      return;
+    }
+    
+    currentInput.push("-");
+    setDisplayHTML("-", false);
+    signChange = true;
     return;
   }
 
   if (signChange) {
-    currentInput.shift();
-    setDisplayText(getDisplayText().slice(1));
+    currentInput.shift(); // Remove the negative sign from the beginning
+    setDisplayHTML(currentInput.join(""), false);
     signChange = false;
-    return;
+  } else {
+    currentInput.unshift("-"); // Add negative sign to the beginning
+    setDisplayHTML(currentInput.join(""), false);
+    signChange = true;
   }
-  currentInput.unshift("-");
-  setDisplayText("-" + getDisplayText());
-  signChange = true;
+  
   // TESTING
   console.log("toggleSign");
   console.log("currentInput", currentInput);
