@@ -26,7 +26,7 @@ const setDisplayHTML = (html, append = true) => {
 const getExpressionText = () => expressionDisplay.innerText;
 const setExpressionText = (text) => (expressionDisplay.innerText = text);
 const updateExpressionDisplay = () => {
-  setExpressionText(expression.length > 0 ? expression.join(" ") : "–"); // Changed
+  setExpressionText(expression.length > 0 ? expression.join(" ") : "");
 };
 
 const exponentDisplay = (value) => {
@@ -106,9 +106,14 @@ function handleNumber(button) {
     // If we already have a single zero, don't add more zeros
     return;
   }
-  
+
   // Replace a single leading zero with the new digit (unless it's a decimal number)
-  if (value !== "0" && currentInput.length === 1 && currentInput[0] === "0" && !currentInput.includes(".")) {
+  if (
+    value !== "0" &&
+    currentInput.length === 1 &&
+    currentInput[0] === "0" &&
+    !currentInput.includes(".")
+  ) {
     currentInput = [];
     setDisplayHTML(value, false);
     currentInput.push(value);
@@ -250,7 +255,7 @@ function handleOperator(button) {
       const result = calculate();
       if (result === undefined) return;
       expression = [result, value];
-      
+
       // Clear the display when chaining calculations
       setDisplayHTML("", false);
     } else {
@@ -286,6 +291,7 @@ function calculate() {
     case "/":
       if (num2 === 0) {
         expression.pop(); // Remove the zero
+        setDisplayHTML("", false); // Clear display before showing error
         showError("Please use a non-zero divisor");
         return undefined;
       }
@@ -307,22 +313,25 @@ function reset() {
   currentInput = [];
   expression = [];
   signChange = false;
-  setDisplayHTML("", false); // Reset display to just cursor
-  setExpressionText("–"); // Changed from expressionDisplay.innerText = "–"
+  setDisplayHTML("", false);
+  setExpressionText(""); // Changed from "–"
 }
 
 function toggleSign() {
   // If no input yet, add a negative sign to start with
   if (currentInput.length === 0) {
     // Check if we're in the middle of a calculation
-    if (expression.length >= 2 && OPERATORS.includes(expression[expression.length - 1])) {
+    if (
+      expression.length >= 2 &&
+      OPERATORS.includes(expression[expression.length - 1])
+    ) {
       // We're toggling the sign for the second number in a calculation
       currentInput.push("-");
       setDisplayHTML("-", false);
       signChange = true;
       return;
     }
-    
+
     currentInput.push("-");
     setDisplayHTML("-", false);
     signChange = true;
@@ -338,7 +347,7 @@ function toggleSign() {
     setDisplayHTML(currentInput.join(""), false);
     signChange = true;
   }
-  
+
   // TESTING
   console.log("toggleSign");
   console.log("currentInput", currentInput);
@@ -356,13 +365,13 @@ function deleteLastDigit() {
 }
 
 function showError(message = "Invalid Operation", preserveState = true) {
-  setExpressionText(message); // Changed from expressionDisplay.innerText = message
+  setExpressionText(message);
 
   if (!preserveState) {
     currentInput = [];
     expression = [];
     signChange = false;
-    setDisplayText("0");
+    display.innerHTML = '<span class="cursor">|</span>';
   }
 
   setTimeout(() => {

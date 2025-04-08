@@ -23,6 +23,13 @@ const checkState = (currentInput, expression, signChange) => {
   expect(calculator.signChange).toBe(signChange);
 };
 
+const createButton = (value, action = "number") => {
+  const button = document.createElement("button");
+  button.dataset.value = value;
+  button.dataset.action = action;
+  return button;
+};
+
 beforeEach(() => {
   document.body.innerHTML = `
     <div class="container">
@@ -159,7 +166,7 @@ describe("Happy Path - Special Functions", () => {
     const buttons = [
       { value: "5", action: "number" },
       { value: "+", action: "operator" },
-      { value: "3", action: "number" }
+      { value: "3", action: "number" },
     ];
 
     buttons.forEach((btn) => {
@@ -176,7 +183,7 @@ describe("Happy Path - Special Functions", () => {
     calculator.handleClear(clearButton);
 
     // Verify everything is reset
-    checkDisplays("|", "–");  // Expect cursor to remain
+    checkDisplays("|", "–"); // Expect cursor to remain
     checkState([], [], false);
   });
   test("delete removes last digit", () => {
@@ -184,7 +191,7 @@ describe("Happy Path - Special Functions", () => {
     const buttons = [
       { value: "1", action: "number" },
       { value: "2", action: "number" },
-      { value: "3", action: "number" }
+      { value: "3", action: "number" },
     ];
 
     buttons.forEach((btn) => {
@@ -204,32 +211,32 @@ describe("Happy Path - Special Functions", () => {
     checkState(["1", "2"], [], false);
   });
   test("sign toggle works on number", () => {
-      // First enter a number
-      const numberButton = document.createElement("button");
-      numberButton.dataset.value = "5";
-      numberButton.dataset.action = "number";
-      calculator.handleNumber(numberButton);
-  
-      // Toggle sign to negative
-      const signButton = document.createElement("button");
-      signButton.dataset.action = "sign";
-      calculator.handleFunction(signButton);
-  
-      checkDisplays("-5", "–");
-      checkState(["-", "5"], [], true);
-  
-      // Toggle sign back to positive
-      calculator.handleFunction(signButton);
-      checkDisplays("5", "–");
-      checkState(["5"], [], false);
-    });
+    // First enter a number
+    const numberButton = document.createElement("button");
+    numberButton.dataset.value = "5";
+    numberButton.dataset.action = "number";
+    calculator.handleNumber(numberButton);
+
+    // Toggle sign to negative
+    const signButton = document.createElement("button");
+    signButton.dataset.action = "sign";
+    calculator.handleFunction(signButton);
+
+    checkDisplays("-5", "–");
+    checkState(["-", "5"], [], true);
+
+    // Toggle sign back to positive
+    calculator.handleFunction(signButton);
+    checkDisplays("5", "–");
+    checkState(["5"], [], false);
+  });
   test("exponent operation", () => {
     // Enter base number
     const buttons = [
       { value: "2", action: "number" },
-      { action: "exponent" },  // Press exponent button
-      { value: "3", action: "number" },  // Enter exponent
-      { value: "=", action: "operator" }  // Calculate
+      { action: "exponent" }, // Press exponent button
+      { value: "3", action: "number" }, // Enter exponent
+      { value: "=", action: "operator" }, // Calculate
     ];
 
     buttons.forEach((btn) => {
@@ -245,143 +252,143 @@ describe("Happy Path - Special Functions", () => {
     checkState([], [8], false);
   });
   test("calculation with exponentiated term", () => {
-      const buttons = [
-        // Calculate 2^3 first
-        { value: "2", action: "number" },
-        { action: "exponent" },
-        { value: "3", action: "number" },
-        // Then multiply by 5
-        { value: "*", action: "operator" },
-        { value: "5", action: "number" },
-        { value: "=", action: "operator" }
-      ];
-  
-      buttons.forEach((btn) => {
-        const button = document.createElement("button");
-        if (btn.value) button.dataset.value = btn.value;
-        button.dataset.action = btn.action;
-        if (btn.action === "number") calculator.handleNumber(button);
-        else if (btn.action === "operator") calculator.handleOperator(button);
-        else if (btn.action === "exponent") calculator.handleFunction(button);
-      });
-  
-      checkDisplays("40", "8 * 5 ="); // 2^3=8, 8*5=40
-      checkState([], [40], false);
+    const buttons = [
+      // Calculate 2^3 first
+      { value: "2", action: "number" },
+      { action: "exponent" },
+      { value: "3", action: "number" },
+      // Then multiply by 5
+      { value: "*", action: "operator" },
+      { value: "5", action: "number" },
+      { value: "=", action: "operator" },
+    ];
+
+    buttons.forEach((btn) => {
+      const button = document.createElement("button");
+      if (btn.value) button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      else if (btn.action === "operator") calculator.handleOperator(button);
+      else if (btn.action === "exponent") calculator.handleFunction(button);
     });
+
+    checkDisplays("40", "8 * 5 ="); // 2^3=8, 8*5=40
+    checkState([], [40], false);
+  });
 });
 
 describe("Edge Cases", () => {
   test("decimal point handling", () => {
-      // Test single decimal in number
-      const buttons1 = [
-        { value: "1", action: "number" },
-        { value: ".", action: "decimal" },
-        { value: "5", action: "number" }
-      ];
-  
-      buttons1.forEach((btn) => {
-        const button = document.createElement("button");
-        button.dataset.value = btn.value;
-        button.dataset.action = btn.action;
-        if (btn.action === "number") calculator.handleNumber(button);
-        if (btn.action === "decimal") calculator.handleDecimal(button);
-      });
-  
-      checkDisplays("1.5", "–");
-      checkState(["1", ".", "5"], [], false);
-  
-      // Test decimal at start becomes "0."
-      calculator.reset();
-      const decimalFirstButton = document.createElement("button");
-      decimalFirstButton.dataset.value = ".";
-      decimalFirstButton.dataset.action = "decimal";
-      calculator.handleDecimal(decimalFirstButton);
-  
-      checkDisplays("0.", "–");
-      checkState(["0", "."], [], false);
-  
-      // Test multiple decimals prevented
-      calculator.reset();
-      const buttons2 = [
-        { value: "2", action: "number" },
-        { value: ".", action: "decimal" },
-        { value: ".", action: "decimal" } // Second decimal should be rejected
-      ];
-  
-      // Mock setTimeout to control timing
-      jest.useFakeTimers();
-      const originalShowError = calculator.showError;
-      let errorMessage = "";
-      calculator.showError = (message) => {
-        errorMessage = message;
-        originalShowError.call(calculator, message);
-      };
-  
-      buttons2.forEach((btn) => {
-        const button = document.createElement("button");
-        button.dataset.value = btn.value;
-        button.dataset.action = btn.action;
-        if (btn.action === "number") calculator.handleNumber(button);
-        if (btn.action === "decimal") calculator.handleDecimal(button);
-      });
-  
-      // Verify error was shown
-      expect(errorMessage).toBe("Invalid decimal in number");
-      
-      // Fast-forward time by 2 seconds
-      jest.advanceTimersByTime(2000);
-      
-      // Verify display returns to normal after timeout
-      checkDisplays("2.", "–");
-      checkState(["2", "."], [], false);
-      
-      // Clean up
-      calculator.showError = originalShowError;
-      jest.useRealTimers();
+    // Test single decimal in number
+    const buttons1 = [
+      { value: "1", action: "number" },
+      { value: ".", action: "decimal" },
+      { value: "5", action: "number" },
+    ];
+
+    buttons1.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      if (btn.action === "decimal") calculator.handleDecimal(button);
     });
+
+    checkDisplays("1.5", "–");
+    checkState(["1", ".", "5"], [], false);
+
+    // Test decimal at start becomes "0."
+    calculator.reset();
+    const decimalFirstButton = document.createElement("button");
+    decimalFirstButton.dataset.value = ".";
+    decimalFirstButton.dataset.action = "decimal";
+    calculator.handleDecimal(decimalFirstButton);
+
+    checkDisplays("0.", "–");
+    checkState(["0", "."], [], false);
+
+    // Test multiple decimals prevented
+    calculator.reset();
+    const buttons2 = [
+      { value: "2", action: "number" },
+      { value: ".", action: "decimal" },
+      { value: ".", action: "decimal" }, // Second decimal should be rejected
+    ];
+
+    // Mock setTimeout to control timing
+    jest.useFakeTimers();
+    const originalShowError = calculator.showError;
+    let errorMessage = "";
+    calculator.showError = (message) => {
+      errorMessage = message;
+      originalShowError.call(calculator, message);
+    };
+
+    buttons2.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      if (btn.action === "decimal") calculator.handleDecimal(button);
+    });
+
+    // Verify error was shown
+    expect(errorMessage).toBe("Invalid decimal in number");
+
+    // Fast-forward time by 2 seconds
+    jest.advanceTimersByTime(2000);
+
+    // Verify display returns to normal after timeout
+    checkDisplays("2.", "–");
+    checkState(["2", "."], [], false);
+
+    // Clean up
+    calculator.showError = originalShowError;
+    jest.useRealTimers();
+  });
   test("large numbers", () => {
-      // Enter a large number
-      const largeNumber = "9999999999";
-      for (let digit of largeNumber) {
-        const button = document.createElement("button");
-        button.dataset.value = digit;
-        button.dataset.action = "number";
-        calculator.handleNumber(button);
-      }
-  
-      checkDisplays(largeNumber, "–");
-      checkState(largeNumber.split(""), [], false);
-  
-      // Test calculation with large numbers
-      const operatorButton = document.createElement("button");
-      operatorButton.dataset.value = "*";
-      operatorButton.dataset.action = "operator";
-      calculator.handleOperator(operatorButton);
-  
-      const secondNumber = "2";
-      const secondButton = document.createElement("button");
-      secondButton.dataset.value = secondNumber;
-      secondButton.dataset.action = "number";
-      calculator.handleNumber(secondButton);
-  
-      const equalsButton = document.createElement("button");
-      equalsButton.dataset.value = "=";
-      equalsButton.dataset.action = "operator";
-      calculator.handleOperator(equalsButton);
-  
-      // Instead of using regex to check for scientific notation
-      const result = displayText();
-      
-      // Check if the result contains 'e+' which indicates scientific notation
-      expect(result.includes('e+')).toBe(true);
-      
-      // Verify the actual numeric value matches the expected calculation
-      const numericResult = Number(result);
-      const expectedResult = Number(largeNumber) * Number(secondNumber);
-      expect(numericResult).toBe(expectedResult);
-      
-      expect(expressionText()).toBe(`${largeNumber} * ${secondNumber} =`);
-    });  
+    // Enter a large number
+    const largeNumber = "9999999999";
+    for (let digit of largeNumber) {
+      const button = document.createElement("button");
+      button.dataset.value = digit;
+      button.dataset.action = "number";
+      calculator.handleNumber(button);
+    }
+
+    checkDisplays(largeNumber, "–");
+    checkState(largeNumber.split(""), [], false);
+
+    // Test calculation with large numbers
+    const operatorButton = document.createElement("button");
+    operatorButton.dataset.value = "*";
+    operatorButton.dataset.action = "operator";
+    calculator.handleOperator(operatorButton);
+
+    const secondNumber = "2";
+    const secondButton = document.createElement("button");
+    secondButton.dataset.value = secondNumber;
+    secondButton.dataset.action = "number";
+    calculator.handleNumber(secondButton);
+
+    const equalsButton = document.createElement("button");
+    equalsButton.dataset.value = "=";
+    equalsButton.dataset.action = "operator";
+    calculator.handleOperator(equalsButton);
+
+    // Instead of using regex to check for scientific notation
+    const result = displayText();
+
+    // Check if the result contains 'e+' which indicates scientific notation
+    expect(result.includes("e+")).toBe(true);
+
+    // Verify the actual numeric value matches the expected calculation
+    const numericResult = Number(result);
+    const expectedResult = Number(largeNumber) * Number(secondNumber);
+    expect(numericResult).toBe(expectedResult);
+
+    expect(expressionText()).toBe(`${largeNumber} * ${secondNumber} =`);
+  });
   test("negative numbers in operations", () => {
     // Test negative number in operation
     const buttons = [
@@ -389,9 +396,9 @@ describe("Edge Cases", () => {
       { value: "-", action: "operator" },
       { action: "sign" }, // Make the next number negative
       { value: "3", action: "number" },
-      { value: "=", action: "operator" }
+      { value: "=", action: "operator" },
     ];
-  
+
     buttons.forEach((btn) => {
       const button = document.createElement("button");
       if (btn.value) button.dataset.value = btn.value;
@@ -400,95 +407,158 @@ describe("Edge Cases", () => {
       else if (btn.action === "operator") calculator.handleOperator(button);
       else if (btn.action === "sign") calculator.handleFunction(button);
     });
-  
+
     checkDisplays("8", "5 - -3 ="); // 5 - (-3) = 8
     checkState([], [8], false);
-  
-  // Test calculation with negative first number
-  calculator.reset();
-  
-  const firstNumButton = document.createElement("button");
-  firstNumButton.dataset.value = "7";
-  firstNumButton.dataset.action = "number";
-  calculator.handleNumber(firstNumButton);
-  
-  const signButton = document.createElement("button");
-  signButton.dataset.action = "sign";
-  calculator.handleFunction(signButton);
-  
-  const opButton = document.createElement("button");
-  opButton.dataset.value = "+";
-  opButton.dataset.action = "operator";
-  calculator.handleOperator(opButton);
-  
-  const secondNumButton = document.createElement("button");
-  secondNumButton.dataset.value = "4";
-  secondNumButton.dataset.action = "number";
-  calculator.handleNumber(secondNumButton);
-  
-  const eqButton = document.createElement("button");
-  eqButton.dataset.value = "=";
-  eqButton.dataset.action = "operator";
-  calculator.handleOperator(eqButton);
-  
-  checkDisplays("-3", "-7 + 4 ="); // -7 + 4 = -3
-  checkState([], [-3], false);
+
+    // Test calculation with negative first number
+    calculator.reset();
+
+    const firstNumButton = document.createElement("button");
+    firstNumButton.dataset.value = "7";
+    firstNumButton.dataset.action = "number";
+    calculator.handleNumber(firstNumButton);
+
+    const signButton = document.createElement("button");
+    signButton.dataset.action = "sign";
+    calculator.handleFunction(signButton);
+
+    const opButton = document.createElement("button");
+    opButton.dataset.value = "+";
+    opButton.dataset.action = "operator";
+    calculator.handleOperator(opButton);
+
+    const secondNumButton = document.createElement("button");
+    secondNumButton.dataset.value = "4";
+    secondNumButton.dataset.action = "number";
+    calculator.handleNumber(secondNumButton);
+
+    const eqButton = document.createElement("button");
+    eqButton.dataset.value = "=";
+    eqButton.dataset.action = "operator";
+    calculator.handleOperator(eqButton);
+
+    checkDisplays("-3", "-7 + 4 ="); // -7 + 4 = -3
+    checkState([], [-3], false);
   });
   test("multiple zeros at start", () => {
-      // Test entering multiple zeros at start
-      const buttons = [
-        { value: "0", action: "number" },
-        { value: "0", action: "number" },
-        { value: "0", action: "number" }
-      ];
-  
-      buttons.forEach((btn) => {
-        const button = document.createElement("button");
-        button.dataset.value = btn.value;
-        button.dataset.action = btn.action;
-        calculator.handleNumber(button);
-      });
-  
-      // Should display just a single zero
-      checkDisplays("0", "–");
-      checkState(["0"], [], false);
-  
-      // Now add a non-zero digit
-      const nonZeroButton = document.createElement("button");
-      nonZeroButton.dataset.value = "5";
-      nonZeroButton.dataset.action = "number";
-      calculator.handleNumber(nonZeroButton);
-  
-      // Should now show "5" (replacing the zero)
-      checkDisplays("5", "–");
-      checkState(["5"], [], false);
-  
-      // Test with decimal point
-      calculator.reset();
-      const zeroDecimalButtons = [
-        { value: "0", action: "number" },
-        { value: "0", action: "number" },
-        { value: ".", action: "decimal" },
-        { value: "3", action: "number" }
-      ];
-  
-      zeroDecimalButtons.forEach((btn) => {
-        const button = document.createElement("button");
-        button.dataset.value = btn.value;
-        button.dataset.action = btn.action;
-        if (btn.action === "number") calculator.handleNumber(button);
-        if (btn.action === "decimal") calculator.handleDecimal(button);
-      });
-  
-      // Should display "0.3" (keeping the leading zero for decimal)
-      checkDisplays("0.3", "–");
-      checkState(["0", ".", "3"], [], false);
+    // Test entering multiple zeros at start
+    const buttons = [
+      { value: "0", action: "number" },
+      { value: "0", action: "number" },
+      { value: "0", action: "number" },
+    ];
+
+    buttons.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      calculator.handleNumber(button);
     });
+
+    // Should display just a single zero
+    checkDisplays("0", "–");
+    checkState(["0"], [], false);
+
+    // Now add a non-zero digit
+    const nonZeroButton = document.createElement("button");
+    nonZeroButton.dataset.value = "5";
+    nonZeroButton.dataset.action = "number";
+    calculator.handleNumber(nonZeroButton);
+
+    // Should now show "5" (replacing the zero)
+    checkDisplays("5", "–");
+    checkState(["5"], [], false);
+
+    // Test with decimal point
+    calculator.reset();
+    const zeroDecimalButtons = [
+      { value: "0", action: "number" },
+      { value: "0", action: "number" },
+      { value: ".", action: "decimal" },
+      { value: "3", action: "number" },
+    ];
+
+    zeroDecimalButtons.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      if (btn.action === "decimal") calculator.handleDecimal(button);
+    });
+
+    // Should display "0.3" (keeping the leading zero for decimal)
+    checkDisplays("0.3", "–");
+    checkState(["0", ".", "3"], [], false);
+  });
 });
 
 describe("Error Cases", () => {
-  test("division by zero", () => {});
-  test("invalid operation sequence", () => {});
-  test("multiple decimals prevented", () => {});
-  test("overflow handling", () => {});
+  test("division by zero", () => {
+    const buttons = [
+      { value: "5", action: "number" },
+      { value: "/", action: "operator" },
+      { value: "0", action: "number" },
+      { value: "=", action: "operator" },
+    ];
+
+    buttons.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      if (btn.action === "operator") calculator.handleOperator(button);
+    });
+
+    // Verify error appears in expression display
+    expect(expressionText()).toBe("Please use a non-zero divisor");
+
+    // Use checkState instead of direct assertions
+    checkState([], ["5", "/"], false);
+  });
+
+  test("invalid operation sequence", () => {
+    const buttons = [
+      { value: "5", action: "number" },
+      { value: "+", action: "operator" },
+      { value: "*", action: "operator" },
+    ];
+
+    buttons.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      if (btn.action === "operator") calculator.handleOperator(button);
+    });
+
+    // The actual behavior replaces the previous operator
+    expect(expressionText()).toBe("5 *");
+    checkState([], ["5", "*"], false);
+  });
+
+  test("multiple decimals prevented", () => {
+    const buttons = [
+      { value: "2", action: "number" },
+      { value: ".", action: "decimal" },
+      { value: ".", action: "decimal" },
+    ];
+
+    jest.useFakeTimers();
+    buttons.forEach((btn) => {
+      const button = document.createElement("button");
+      button.dataset.value = btn.value;
+      button.dataset.action = btn.action;
+      if (btn.action === "number") calculator.handleNumber(button);
+      if (btn.action === "decimal") calculator.handleDecimal(button);
+    });
+
+    expect(expressionText()).toBe("Invalid decimal in number");
+    checkState(["2", "."], [], false);
+
+    jest.advanceTimersByTime(2000);
+    jest.useRealTimers();
+  });
+
+  // Removed redundant overflow handling test since it's covered by "large numbers" test
 });
