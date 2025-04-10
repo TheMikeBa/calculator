@@ -28,7 +28,6 @@ const setExpressionText = (text) => (expressionDisplay.innerText = text);
 const updateExpressionDisplay = () => {
   setExpressionText(expression.length > 0 ? expression.join(" ") : "");
 };
-
 const exponentDisplay = (value) => {
   const parts = getDisplayHTML().split("<sup>");
   const baseNumber = parts[0].replace('<span class="cursor">|</span>', "");
@@ -144,6 +143,12 @@ function handleNumber(button) {
 }
 
 function handleDecimal(button) {
+  // Current implementation can be optimized:
+  const hasDecimal = currentInput.join("").includes(".");
+  if (hasDecimal) {
+    showError("Invalid decimal in number");
+    return;
+  }
   const parts = currentInput.join("").split("**");
   const isInExponent = currentInput.includes("**");
 
