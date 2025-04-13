@@ -66,7 +66,8 @@ describe("Happy Path - Basic Operations", () => {
 
     buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     const expected = 5 + 3;
@@ -83,7 +84,8 @@ describe("Happy Path - Basic Operations", () => {
 
     buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     const expected = 9 - 4;
@@ -100,7 +102,8 @@ describe("Happy Path - Basic Operations", () => {
 
     buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     const expected = 6 * 7;
@@ -117,7 +120,8 @@ describe("Happy Path - Basic Operations", () => {
 
     buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     const expected = 15 / 3;
@@ -136,7 +140,8 @@ describe("Happy Path - Basic Operations", () => {
 
     buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     const expected = 1 + 2 * 3; // Note order of operations
@@ -199,7 +204,6 @@ describe("Happy Path - Special Functions", () => {
     checkState(["5"], [], false);
   });
   test("exponent operation", () => {
-    // Enter base number and exponent
     const buttons = [
       createButton("2"),
       createButton("", "exponent"),
@@ -215,8 +219,8 @@ describe("Happy Path - Special Functions", () => {
         calculator.handleFunction(button);
     });
 
-    checkDisplays("8", "2 ** 3 =");
-    checkState([], [8], false);
+    checkDisplays("8", "2<sup>3</sup> ="); // Updated to expect superscript
+    checkState([], ["8"], false);
   });
   test("calculation with exponentiated term", () => {
     const buttons = [
@@ -239,7 +243,7 @@ describe("Happy Path - Special Functions", () => {
     });
 
     const expected = Math.pow(2, 3) * 5;
-    checkDisplays(expected.toString(), "8 * 5 =");
+    checkDisplays(expected.toString(), "8 * 5 ="); // Main display shows evaluated exponent
     checkState([], [expected], false);
   });
 });
@@ -252,17 +256,20 @@ describe("Exponent Operations", () => {
       createButton("5"),
       createButton("", "exponent"),
       createButton("2"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "decimal") calculator.handleDecimal(button);
-      else if (button.dataset.action === "exponent") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "decimal")
+        calculator.handleDecimal(button);
+      else if (button.dataset.action === "exponent")
+        calculator.handleFunction(button);
     });
 
-    checkDisplays("6.25", "2.5 ** 2 ="); // 2.5^2 = 6.25
+    checkDisplays("6.25", "2.5<sup>2</sup> ="); // Updated to expect superscript
     checkState([], [6.25], false);
   });
 
@@ -272,17 +279,20 @@ describe("Exponent Operations", () => {
       createButton("", "exponent"),
       createButton("", "sign"), // Make exponent negative
       createButton("3"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "sign") calculator.handleFunction(button);
-      else if (button.dataset.action === "exponent") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "sign")
+        calculator.handleFunction(button);
+      else if (button.dataset.action === "exponent")
+        calculator.handleFunction(button);
     });
 
-    checkDisplays("0.125", "2 ** -3 ="); // 2^-3 = 0.125
+    checkDisplays("0.125", "2<sup>-3</sup> ="); // Updated to expect superscript
     checkState([], [0.125], false);
   });
 
@@ -294,18 +304,22 @@ describe("Exponent Operations", () => {
       createButton("", "exponent"),
       createButton("", "sign"), // Make exponent negative
       createButton("2"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "decimal") calculator.handleDecimal(button);
-      else if (button.dataset.action === "sign") calculator.handleFunction(button);
-      else if (button.dataset.action === "exponent") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "decimal")
+        calculator.handleDecimal(button);
+      else if (button.dataset.action === "sign")
+        calculator.handleFunction(button);
+      else if (button.dataset.action === "exponent")
+        calculator.handleFunction(button);
     });
 
-    checkDisplays("0.444...", "1.5 ** -2 ="); // 1.5^-2 ≈ 0.444...
+    checkDisplays("0.444...", "1.5<sup>-2</sup> ="); // 1.5^-2 ≈ 0.444...
     checkState([], [0.4444444444444444], false);
   });
 
@@ -316,14 +330,17 @@ describe("Exponent Operations", () => {
       createButton("1"),
       createButton(".", "decimal"),
       createButton("5"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "decimal") calculator.handleDecimal(button);
-      else if (button.dataset.action === "exponent") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "decimal")
+        calculator.handleDecimal(button);
+      else if (button.dataset.action === "exponent")
+        calculator.handleFunction(button);
     });
 
     const expected = Math.pow(2, 1.5);
@@ -340,14 +357,17 @@ describe("Exponent Operations", () => {
       createButton("1"),
       createButton(".", "decimal"),
       createButton("5"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "decimal") calculator.handleDecimal(button);
-      else if (button.dataset.action === "exponent") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "decimal")
+        calculator.handleDecimal(button);
+      else if (button.dataset.action === "exponent")
+        calculator.handleFunction(button);
     });
 
     const expected = Math.pow(1.5, 1.5);
@@ -455,19 +475,21 @@ describe("Edge Cases", () => {
       createButton("-", "operator"),
       createButton("", "sign"),
       createButton("3"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "sign") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "sign")
+        calculator.handleFunction(button);
     });
-  
-    const expected = 5 - (-3);
+
+    const expected = 5 - -3;
     checkDisplays(expected.toString(), "5 - -3 =");
     checkState([], [expected], false);
-  
+
     // Test calculation with negative first number
     calculator.reset();
     const buttons2 = [
@@ -475,28 +497,26 @@ describe("Edge Cases", () => {
       createButton("", "sign"),
       createButton("+", "operator"),
       createButton("4"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons2.forEach(button => {
+    buttons2.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      else if (button.dataset.action === "operator") calculator.handleOperator(button);
-      else if (button.dataset.action === "sign") calculator.handleFunction(button);
+      else if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
+      else if (button.dataset.action === "sign")
+        calculator.handleFunction(button);
     });
-  
+
     const expected2 = -7 + 4;
     checkDisplays(expected2.toString(), "-7 + 4 =");
     checkState([], [expected2], false);
   });
   test("multiple zeros at start", () => {
     // Test entering multiple zeros at start
-    const buttons = [
-      createButton("0"),
-      createButton("0"), 
-      createButton("0")
-    ];
+    const buttons = [createButton("0"), createButton("0"), createButton("0")];
 
-    buttons.forEach(button => calculator.handleNumber(button));
+    buttons.forEach((button) => calculator.handleNumber(button));
 
     // Should display just a single zero
     checkDisplays("0", "–");
@@ -516,10 +536,10 @@ describe("Edge Cases", () => {
       createButton("0"),
       createButton("0"),
       createButton(".", "decimal"),
-      createButton("3")
+      createButton("3"),
     ];
 
-    zeroDecimalButtons.forEach(button => {
+    zeroDecimalButtons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
       if (button.dataset.action === "decimal") calculator.handleDecimal(button);
     });
@@ -534,12 +554,13 @@ describe("Edge Cases", () => {
       createButton("5"),
       createButton("*", "operator"),
       createButton("0"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons1.forEach(button => {
+    buttons1.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     checkDisplays("0", "5 * 0 =");
@@ -551,12 +572,13 @@ describe("Edge Cases", () => {
       createButton("0"),
       createButton("+", "operator"),
       createButton("5"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons2.forEach(button => {
+    buttons2.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     checkDisplays("5", "0 + 5 =");
@@ -570,12 +592,13 @@ describe("Error Cases", () => {
       createButton("5"),
       createButton("/", "operator"),
       createButton("0"),
-      createButton("=", "operator")
+      createButton("=", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     // Verify error appears in expression display
@@ -587,12 +610,13 @@ describe("Error Cases", () => {
     const buttons = [
       createButton("5"),
       createButton("+", "operator"),
-      createButton("*", "operator")
+      createButton("*", "operator"),
     ];
 
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
-      if (button.dataset.action === "operator") calculator.handleOperator(button);
+      if (button.dataset.action === "operator")
+        calculator.handleOperator(button);
     });
 
     // The actual behavior replaces the previous operator
@@ -604,11 +628,11 @@ describe("Error Cases", () => {
     const buttons = [
       createButton("2"),
       createButton(".", "decimal"),
-      createButton(".", "decimal")
+      createButton(".", "decimal"),
     ];
 
     jest.useFakeTimers();
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       if (button.dataset.action === "number") calculator.handleNumber(button);
       if (button.dataset.action === "decimal") calculator.handleDecimal(button);
     });

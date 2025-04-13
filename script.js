@@ -25,6 +25,9 @@ const setDisplayHTML = (html, append = true) => {
 // Expression display helper functions
 const getExpressionText = () => expressionDisplay.innerText;
 const setExpressionText = (text) => (expressionDisplay.innerText = text);
+const setExpressionHTML = (html) => {
+  expressionDisplay.innerHTML = html;
+};
 const updateExpressionDisplay = () => {
   setExpressionText(expression.length > 0 ? expression.join(" ") : "");
 };
@@ -194,6 +197,7 @@ function handleFunction(button) {
   }
 }
 
+// Then modify the exponent display parts:
 function handleOperator(button) {
   if (currentInput.length === 0 && expression.length === 0) {
     return;
@@ -208,8 +212,17 @@ function handleOperator(button) {
     ) {
       const exponentValue = currentInput.join("");
       const result = convertToNumber(exponentValue);
-      expression.push(result.toString()); // Keep as string for consistency
+      expression.push(exponentValue); // Store original expression
       currentInput = [];
+
+      if (button.dataset.value === "=") {
+        // Format the exponent expression for display
+        const [base, exp] = exponentValue.split("**");
+        setExpressionHTML(`${base}<sup>${exp}</sup> =`);
+        setDisplayText(result.toString());
+        expression = [result.toString()];
+        return;
+      }
     }
     // If exponent was just started (last char is "**"), remove it
     else if (currentInput[currentInput.length - 1] === "**") {
@@ -230,9 +243,10 @@ function handleOperator(button) {
     // Handle direct exponentiation
     if (expression.length === 1 && expression[0].includes("**")) {
       const result = convertToNumber(expression[0]);
-      setExpressionText(`${expression.join(" ")} =`);
-      setDisplayText(result.toString()); // Convert to string
-      expression = [result.toString()]; // Store as string
+      const [base, exp] = expression[0].split("**");
+      setExpressionHTML(`${base}<sup>${exp}</sup> =`);
+      setDisplayText(result.toString());
+      expression = [result.toString()];
       return;
     }
 
